@@ -11,6 +11,7 @@ public class MapGenerator : MonoBehaviour
     [Range(0,100)]
     public int fillPercent;
 
+    private MeshGenerator meshGenerator;
     
     [Range(0,10)]
     public int smooths;
@@ -19,8 +20,8 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        meshGenerator = GetComponent<MeshGenerator>();
         GenerateRandomMap();
-        SmoothMap();
     }
 
     private void LateUpdate()
@@ -28,12 +29,18 @@ public class MapGenerator : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             GenerateRandomMap();
-            SmoothMap();
         }
     }
 
+    void GenerateRandomMap()
+    {
+        FillRandomMap();
+        SmoothMap();
+        meshGenerator.GenerateMesh(map, 1);
+    }
+    
     [ContextMenu("Generate")]
-    public void GenerateRandomMap()
+    public void FillRandomMap()
     {
         map = new int[width, height];
 
@@ -46,16 +53,16 @@ public class MapGenerator : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (map == null) return;
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                Gizmos.color = map[i, j] == 1 ? Color.black : Color.white;
-                Vector3 pos = new Vector3(-width * 0.5f + i + 0.5f,  -height * 0.5f + j + 0.5f, 0);
-                Gizmos.DrawCube(pos, Vector3.one);
-            }
-        }
+        // if (map == null) return;
+        // for (int i = 0; i < width; i++)
+        // {
+        //     for (int j = 0; j < height; j++)
+        //     {
+        //         Gizmos.color = map[i, j] == 1 ? Color.black : Color.white;
+        //         Vector3 pos = new Vector3(-width * 0.5f + i + 0.5f,  -height * 0.5f + j + 0.5f, 0);
+        //         Gizmos.DrawCube(pos, Vector3.one);
+        //     }
+        // }
     }
 
 [ContextMenu(nameof(SmoothMap))]
@@ -66,7 +73,7 @@ private void SmoothMap()
             for (int y = 0; y < height; y++)
             {
                 int surroundingWalls = GetSurroundingWallTiles(x,y);
-                Debug.Log(surroundingWalls);
+                // Debug.Log(surroundingWalls);
                 if (surroundingWalls > 4)
                 {
                     map[x, y] = 1;

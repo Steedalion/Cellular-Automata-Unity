@@ -15,7 +15,7 @@ namespace Tests
             mp.height = 20;
             mp.width = 10;
             
-            mp.GenerateRandomMap();
+            mp.FillRandomMap();
             Assert.IsTrue(mp.isWall(0, 1));
             Assert.IsTrue(mp.isWall(1, 0));
             Assert.IsTrue(mp.isWall(9, 0));
@@ -32,7 +32,7 @@ namespace Tests
             mp.height = 20;
             mp.width = 10;
             
-            mp.GenerateRandomMap();
+            mp.FillRandomMap();
             Assert.IsTrue(mp.isWall(0, 1));
             Assert.IsTrue(mp.isWall(1, 0));
             Assert.IsTrue(mp.isWall(9, 0));
