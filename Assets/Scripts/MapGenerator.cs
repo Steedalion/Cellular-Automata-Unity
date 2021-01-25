@@ -14,7 +14,8 @@ public class MapGenerator : MonoBehaviour
     
     [Range(0,10)]
     public int smooths;
-    int[,] map;
+
+    private int[,] map;
 
     private void Start()
     {
@@ -22,8 +23,17 @@ public class MapGenerator : MonoBehaviour
         SmoothMap();
     }
 
+    private void LateUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GenerateRandomMap();
+            SmoothMap();
+        }
+    }
+
     [ContextMenu("Generate")]
-    private void GenerateRandomMap()
+    public void GenerateRandomMap()
     {
         map = new int[width, height];
 
@@ -36,29 +46,36 @@ public class MapGenerator : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (map != null)
+        if (map == null) return;
+        for (int i = 0; i < width; i++)
         {
-            for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
             {
-                for (int j = 0; j < height; j++)
-                {
-                    Gizmos.color = map[i, j] == 1 ? Color.black : Color.white;
-                    Vector3 pos = new Vector3(-width * 0.5f + i + 0.5f, 0, -height * 0.5f + j + 0.5f);
-                    Gizmos.DrawCube(pos, Vector3.one);
-                }
+                Gizmos.color = map[i, j] == 1 ? Color.black : Color.white;
+                Vector3 pos = new Vector3(-width * 0.5f + i + 0.5f,  -height * 0.5f + j + 0.5f, 0);
+                Gizmos.DrawCube(pos, Vector3.one);
             }
         }
     }
 
-[ContextMenu(nameof(SmoothMap))] 
-void SmoothMap()
+[ContextMenu(nameof(SmoothMap))]
+private void SmoothMap()
     {
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 int surroundingWalls = GetSurroundingWallTiles(x,y);
-                map[x, y] = (surroundingWalls > 4) ? 1 : 0;
+                Debug.Log(surroundingWalls);
+                if (surroundingWalls > 4)
+                {
+                    map[x, y] = 1;
+                } else if (surroundingWalls < 4)
+                {
+                    map[x, y] = 0;
+                }
+                    
+                // map[x, y] = (surroundingWalls > 4) ? 1 : 0;
             }
         }
     }
@@ -71,15 +88,15 @@ void SmoothMap()
             for (int neighborY = y-1; neighborY <= y+1; neighborY++)
             {
                 if (neighborX == x && neighborY == y) continue; //self
-                wallCount += isWall(x, y) ? 1 : map[x,y];
+                wallCount += isWall(x, y) ? 1 : map[neighborX,neighborY];
             }  
         }
         return wallCount;
     }
 
 
-    bool isWall(int x, int y)
+    public bool isWall(int x, int y)
     {
-        return (x == 0 || y == 0 || x >= width - 1 || y >= height - 1);
+        return (x == 0 || y == 0 || x == width - 1 || y == height - 1);
     }
 }
