@@ -42,61 +42,60 @@ public class MeshGenerator : MonoBehaviour
     {
         switch (square.configuration)
         {
-            case 0 : break;
-            case 1:
-                MeshFromPoints(square.bottomLeft, square.centerLeft, square.bottomMiddle);
-                break;
-            case 2:
-                MeshFromPoints(square.bottomRight, square.bottomMiddle, square.centerRight);
-                break;
-            case 4:
-                MeshFromPoints(square.topRight, square.centerRight, square.topMiddle);
-                break;
-            case 8:
-                MeshFromPoints(square.topLeft, square.topMiddle, square.centerLeft);
-                break;
-            
-            //2 point
-            case 3:
-                MeshFromPoints(square.centerRight, square.bottomRight, square.bottomLeft, square.centerLeft);
-                break;
-            case 6:
-                MeshFromPoints(square.bottomMiddle, square.topMiddle, square.topRight, square.bottomRight);
-                break;
-            case 9:
-                MeshFromPoints(square.bottomMiddle, square.bottomLeft, square.topLeft, square.topMiddle);
-                break;
-            case 12:
-                MeshFromPoints(square.centerRight, square.centerLeft, square.topLeft, square.topRight);
-                break;
-            //diags
-            case 5:
-                MeshFromPoints(square.bottomLeft, square.centerLeft,
-                    square.topMiddle, square.topRight, square.centerRight, square.bottomMiddle);
-                break;
-            case 10:
-                MeshFromPoints(square.bottomRight, square.bottomMiddle, square.topLeft, square.topMiddle, square.centerRight);
-                break;
-            //3 point
-            case 7:
-                MeshFromPoints(square.bottomRight, square.bottomLeft, square.centerLeft, square.topMiddle, square.topRight);
-                break;
-            case 11:
-                MeshFromPoints(square.bottomRight,  square.bottomLeft, square.topLeft,  square.topMiddle, square.centerRight);
-                break;
-            case 13:
-                MeshFromPoints(square.topRight, square.centerRight, square.bottomMiddle, square.bottomLeft, square.topLeft);
-                break;
-            case 14:
-                MeshFromPoints(square.topRight, square.bottomRight, square.bottomMiddle,  square.centerLeft,   square.topLeft );
-                break;
+           // 1 points:
+        case 1:
+            MeshFromPoints(square.bottomMiddle, square.bottomLeft, square.centerLeft);
+            break;
+        case 2:
+            MeshFromPoints(square.centreRight, square.bottomRight, square.bottomMiddle);
+            break;
+        case 4:
+            MeshFromPoints(square.topMiddle, square.topRight, square.centreRight);
+            break;
+        case 8:
+            MeshFromPoints(square.topLeft, square.topMiddle, square.centerLeft);
+            break;
 
-            //3
-            case 16:
-                MeshFromPoints(square.topLeft,  square.topRight,  square.bottomRight, square.bottomLeft);
-                break;
+        // 2 points:
+        case 3:
+            MeshFromPoints(square.centreRight, square.bottomRight, square.bottomLeft, square.centerLeft);
+            break;
+        case 6:
+            MeshFromPoints(square.topMiddle, square.topRight, square.bottomRight, square.bottomMiddle);
+            break;
+        case 9:
+            MeshFromPoints(square.topLeft, square.topMiddle, square.bottomMiddle, square.bottomLeft);
+            break;
+        case 12:
+            MeshFromPoints(square.topLeft, square.topRight, square.centreRight, square.centerLeft);
+            break;
+        case 5:
+            MeshFromPoints(square.topMiddle, square.topRight, square.centreRight, square.bottomMiddle, square.bottomLeft, square.centerLeft);
+            break;
+        case 10:
+            MeshFromPoints(square.topLeft, square.topMiddle, square.centreRight, square.bottomRight, square.bottomMiddle, square.centerLeft);
+            break;
 
+        // 3 point:
+        case 7:
+            MeshFromPoints(square.topMiddle, square.topRight, square.bottomRight, square.bottomLeft, square.centerLeft);
+            break;
+        case 11:
+            MeshFromPoints(square.topLeft, square.topMiddle, square.centreRight, square.bottomRight, square.bottomLeft);
+            break;
+        case 13:
+            MeshFromPoints(square.topLeft, square.topRight, square.centreRight, square.bottomMiddle, square.bottomLeft);
+            break;
+        case 14:
+            MeshFromPoints(square.topLeft, square.topRight, square.bottomRight, square.bottomMiddle, square.centerLeft);
+            break;
+
+        // 4 point:
+        case 15:
+            MeshFromPoints(square.topLeft, square.topRight, square.bottomRight, square.bottomLeft);
+            break;
         }
+
     }
 
     void MeshFromPoints(params Node[] nodes)
@@ -159,7 +158,7 @@ public class MeshGenerator : MonoBehaviour
                     
                     Gizmos.color = Color.gray;
                     Gizmos.DrawCube(squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(squareGrid.squares[x,y].centerRight.position, Vector3.one * .15f);
+                    Gizmos.DrawCube(squareGrid.squares[x,y].centreRight.position, Vector3.one * .15f);
                     Gizmos.DrawCube(squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
                     Gizmos.DrawCube(squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
     
@@ -219,7 +218,7 @@ public class MeshGenerator : MonoBehaviour
     public class Square
     {
         public ControlNode topLeft, topRight, bottomLeft , bottomRight;
-        public Node topMiddle, bottomMiddle, centerLeft, centerRight;
+        public Node topMiddle, bottomMiddle, centerLeft, centreRight;
         public int configuration;
         // int depicting active nodes; 
         /// <summary>
@@ -248,7 +247,7 @@ public class MeshGenerator : MonoBehaviour
             this.topMiddle = topLeft.right;
             this.bottomMiddle = bottomLeft.right;
             this.centerLeft = bottomLeft.above;
-            this.centerRight = bottomRight.above;
+            this.centreRight = bottomRight.above;
 
             configuration += (topLeft.active)?8:0;
             configuration += (this.topRight.active)?4:0;
