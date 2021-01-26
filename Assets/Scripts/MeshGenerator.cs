@@ -13,7 +13,11 @@ public class MeshGenerator : MonoBehaviour
         {
             vertices = new List<Vector3>();
         triangels = new List<int>();
-        mesh = GetComponent<MeshFilter>().mesh;
+        mesh  = new Mesh();
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        // mesh = GetComponent<MeshFilter>().mesh;
+        // mesh = new Mesh();
         }
 
 
@@ -29,7 +33,6 @@ public class MeshGenerator : MonoBehaviour
             }
         }
 
-        mesh = new Mesh();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangels.ToArray();
         mesh.RecalculateNormals();
@@ -41,16 +44,16 @@ public class MeshGenerator : MonoBehaviour
         {
             case 0 : break;
             case 1:
-                MeshFromPoints(square.bottomLeft, square.bottomMiddle, square.centerLeft);
+                MeshFromPoints(square.bottomLeft, square.centerLeft, square.bottomMiddle);
                 break;
             case 2:
-                MeshFromPoints(square.bottomRight, square.centerRight, square.bottomMiddle);
+                MeshFromPoints(square.bottomRight, square.bottomMiddle, square.centerRight);
                 break;
             case 4:
-                MeshFromPoints(square.topRight, square.topMiddle, square.centerRight);
+                MeshFromPoints(square.topRight, square.centerRight, square.topMiddle);
                 break;
             case 8:
-                MeshFromPoints(square.topLeft, square.centerLeft, square.topMiddle);
+                MeshFromPoints(square.topLeft, square.topMiddle, square.centerLeft);
                 break;
             
             //2 point
@@ -58,44 +61,40 @@ public class MeshGenerator : MonoBehaviour
                 MeshFromPoints(square.centerRight, square.bottomRight, square.bottomLeft, square.centerLeft);
                 break;
             case 6:
-                MeshFromPoints(square.bottomMiddle, square.bottomRight, square.topRight, square.topMiddle);
+                MeshFromPoints(square.bottomMiddle, square.topMiddle, square.topRight, square.bottomRight);
                 break;
             case 9:
-                MeshFromPoints(square.bottomMiddle, square.topMiddle, square.topLeft, square.bottomLeft);
+                MeshFromPoints(square.bottomMiddle, square.bottomLeft, square.topLeft, square.topMiddle);
                 break;
             case 12:
-                MeshFromPoints(square.centerRight, square.topRight, square.topLeft, square.centerLeft);
+                MeshFromPoints(square.centerRight, square.centerLeft, square.topLeft, square.topRight);
                 break;
+            //diags
             case 5:
-                MeshFromPoints(square.bottomLeft, square.bottomMiddle, square.centerRight, square.topRight,
-                    square.topMiddle, square.centerLeft);
+                MeshFromPoints(square.bottomLeft, square.centerLeft,
+                    square.topMiddle, square.topRight, square.centerRight, square.bottomMiddle);
                 break;
             case 10:
-                MeshFromPoints(square.bottomRight, square.centerRight, square.topMiddle, square.topLeft,
-                    square.centerLeft);
+                MeshFromPoints(square.bottomRight, square.bottomMiddle, square.topLeft, square.topMiddle, square.centerRight);
                 break;
             //3 point
             case 7:
-                MeshFromPoints(square.bottomRight, square.topRight, square.topMiddle, square.centerLeft, square.bottomLeft);
+                MeshFromPoints(square.bottomRight, square.bottomLeft, square.centerLeft, square.topMiddle, square.topRight);
                 break;
             case 11:
-                MeshFromPoints(square.bottomRight, square.centerRight,  square.topMiddle, square.topLeft,  square.bottomLeft);
+                MeshFromPoints(square.bottomRight,  square.bottomLeft, square.topLeft,  square.topMiddle, square.centerRight);
                 break;
             case 13:
-                MeshFromPoints(square.topRight, square.topLeft, square.bottomLeft, square.bottomMiddle, square.centerRight);
+                MeshFromPoints(square.topRight, square.centerRight, square.bottomMiddle, square.bottomLeft, square.topLeft);
                 break;
             case 14:
-                MeshFromPoints(square.topRight,   square.topLeft,  square.centerLeft, square.bottomMiddle, square.bottomRight );
+                MeshFromPoints(square.topRight, square.bottomRight, square.bottomMiddle,  square.centerLeft,   square.topLeft );
                 break;
-            case 16:
-                MeshFromPoints(square.topRight,  square.topLeft,  square.bottomLeft, square.bottomRight);
-                break;
-
-
-                        
 
             //3
-                        
+            case 16:
+                MeshFromPoints(square.topLeft,  square.topRight,  square.bottomRight, square.bottomLeft);
+                break;
 
         }
     }
@@ -104,13 +103,13 @@ public class MeshGenerator : MonoBehaviour
     {
         AssignVertices(nodes);
         if (nodes.Length >= 3)
-            CreateTriangels(nodes[2], nodes[1], nodes[0]);
+            CreateTriangels(nodes[0], nodes[1], nodes[2]);
         if (nodes.Length >= 4)
-            CreateTriangels(nodes[0], nodes[2], nodes[3]);
+        CreateTriangels(nodes[0], nodes[2], nodes[3]);
         if (nodes.Length >= 5)
-            CreateTriangels(nodes[0], nodes[3], nodes[4]);
+        CreateTriangels(nodes[0], nodes[3], nodes[4]);
         if (nodes.Length >= 6)
-            CreateTriangels(nodes[0], nodes[4], nodes[5]);
+        CreateTriangels(nodes[0], nodes[4], nodes[5]);
     }
 
     void CreateTriangels(Node a, Node b, Node c)
@@ -135,40 +134,40 @@ public class MeshGenerator : MonoBehaviour
         }
     }
     
-    //
-    // private void OnDrawGizmos()
-    // {
-    //     if (squareGrid != null)
-    //     {
-    //         for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
-    //         {
-    //             for (int y = 0; y < squareGrid.squares.GetLength(1); y++)
-    //             {
-    //
-    //                  Gizmos.color = (squareGrid.squares[x,y].topLeft.active)?Color.black :Color.white;
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].topLeft.position, Vector3.one * 0.4f);
-    //                 
-    //                 Gizmos.color = (squareGrid.squares[x,y].topRight.active)?Color.black :Color.white;
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].topRight.position, Vector3.one * 0.4f);
-    //
-    //                 Gizmos.color = (squareGrid.squares[x,y].bottomLeft.active)?Color.black :Color.white;
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].bottomLeft.position, Vector3.one * 0.4f);
-    //                 
-    //                 
-    //                 Gizmos.color = (squareGrid.squares[x,y].bottomRight.active)?Color.black :Color.white;
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].bottomRight.position, Vector3.one * 0.4f);
-    //                 
-    //                 Gizmos.color = Color.gray;
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].centerRight.position, Vector3.one * .15f);
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
-    //                 Gizmos.DrawCube(squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
-    //
-    //             }
-    //             
-    //         }
-    //     }
-    // }
+    
+    private void OnDrawGizmos()
+    {
+        if (squareGrid != null)
+        {
+            for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
+            {
+                for (int y = 0; y < squareGrid.squares.GetLength(1); y++)
+                {
+    
+                     Gizmos.color = (squareGrid.squares[x,y].topLeft.active)?Color.black :Color.white;
+                    Gizmos.DrawCube(squareGrid.squares[x,y].topLeft.position, Vector3.one * 0.4f);
+                    
+                    Gizmos.color = (squareGrid.squares[x,y].topRight.active)?Color.black :Color.white;
+                    Gizmos.DrawCube(squareGrid.squares[x,y].topRight.position, Vector3.one * 0.4f);
+    
+                    Gizmos.color = (squareGrid.squares[x,y].bottomLeft.active)?Color.black :Color.white;
+                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomLeft.position, Vector3.one * 0.4f);
+                    
+                    
+                    Gizmos.color = (squareGrid.squares[x,y].bottomRight.active)?Color.black :Color.white;
+                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomRight.position, Vector3.one * 0.4f);
+                    
+                    Gizmos.color = Color.gray;
+                    Gizmos.DrawCube(squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
+                    Gizmos.DrawCube(squareGrid.squares[x,y].centerRight.position, Vector3.one * .15f);
+                    Gizmos.DrawCube(squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
+                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
+    
+                }
+                
+            }
+        }
+    }
 
 
     #region Supporting Classes
