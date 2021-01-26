@@ -44,13 +44,13 @@ public class MeshGenerator : MonoBehaviour
         {
            // 1 points:
         case 1:
-            MeshFromPoints(square.bottomMiddle, square.bottomLeft, square.centerLeft);
+            MeshFromPoints(square.centerLeft, square.bottomMiddle, square.bottomLeft);
             break;
         case 2:
-            MeshFromPoints(square.centreRight, square.bottomRight, square.bottomMiddle);
+            MeshFromPoints(square.bottomRight, square.bottomMiddle, square.centreRight);
             break;
         case 4:
-            MeshFromPoints(square.topMiddle, square.topRight, square.centreRight);
+            MeshFromPoints(square.topRight, square.centreRight, square.topMiddle);
             break;
         case 8:
             MeshFromPoints(square.topLeft, square.topMiddle, square.centerLeft);
