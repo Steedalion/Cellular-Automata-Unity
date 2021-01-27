@@ -8,6 +8,8 @@ public class MapGenerator : MonoBehaviour
 {
     public int width, height;
 
+    [Range(0,10)]
+    public int borderSize = 5;
     [Range(0,100)]
     public int fillPercent;
 
@@ -36,6 +38,25 @@ public class MapGenerator : MonoBehaviour
     {
         FillRandomMap();
         SmoothMap();
+        
+        int[,] borderedMap = new int[width + 2 * borderSize, height + 2 * borderSize];
+
+        for (int x = 0; x < borderedMap.GetLength(0); x++)
+        {
+            for (int y = 0; y < borderedMap.GetLength(1); y++)
+            {
+                if (x >= borderSize && x < width + borderSize && y >= borderSize && y < height + borderSize)
+                {
+                    borderedMap[x, y] = map[x - borderSize, y - borderSize];
+                }
+                else
+                {
+                    borderedMap[x, y] = 1;
+                }
+            }
+        }
+
+        map = borderedMap;
         meshGenerator.GenerateMesh(map, 1);
     }
     
