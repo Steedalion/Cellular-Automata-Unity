@@ -50,6 +50,7 @@ public class MeshGenerator : MonoBehaviour
 
     private void CreateWallMesh()
     {
+        CalculateMeshOutlines();
         List<Vector3> wallVertices = new List<Vector3>();
         List<int> wallTriangles = new List<int>();
         Mesh wallMesh = new Mesh();
@@ -60,9 +61,8 @@ public class MeshGenerator : MonoBehaviour
             {
                 int startIndex = wallVertices.Count;
                 wallVertices.Add(vertices[outline[i]]); //left
-                wallVertices.Add(vertices[outline[i]] - Vector3.up * wallHeight); //topLeft
-                
                 wallVertices.Add(vertices[outline[i+1]]);
+                wallVertices.Add(vertices[outline[i]] - Vector3.up * wallHeight); //bottom Left
                 wallVertices.Add(vertices[outline[i+1]] - Vector3.up * wallHeight);
                 
                 wallTriangles.Add(startIndex + 0);
@@ -255,33 +255,6 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-    readonly struct Triangle
-    {
-        public readonly int vertexA;
-        public readonly int vertexB;
-        public readonly int vertexC;
-        public readonly int[] vertices;
-
-        public Triangle(int vertexA, int vertexB, int vertexC)
-        {
-            this.vertexA = vertexA;
-            this.vertexB = vertexB;
-            this.vertexC = vertexC;
-            
-            vertices = new int[3];
-            vertices[0] = this.vertexA;
-            vertices[1] = this.vertexB;
-            vertices[2] = this.vertexC;
-        }
-
-        public int this[int i] => vertices[i];
-
-        public bool Contains(int vertexIndex)
-        {
-            return vertexIndex == vertexA || vertexIndex ==vertexB || vertexIndex ==vertexC;
-        }
-    }
-
 
     private void AssignVertices(Node[] points)
     {
@@ -331,117 +304,5 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-
-    #region Supporting Classes
-    public class SquareGrid
-    {
-        
-        private float squareSize;
-        public Square[,] squares;
-
-        
-        
-        public SquareGrid(int[,] map, float squareSize)
-        {
-            this.squareSize = squareSize;
-            int xnodes = map.GetLength(0);
-            int ynodes = map.GetLength(1);
-            float mapWidth = xnodes * squareSize;
-            float mapHeight = ynodes    *    squareSize;
-
-            ControlNode[,] controlNodes = new ControlNode[xnodes, ynodes];
-            for (int x = 0; x < xnodes; x++)
-            {
-                for (int y = 0; y < ynodes; y++)
-                {
-                    Vector3 pos = new Vector3(
-                        -mapWidth * 0.5f + x * squareSize + squareSize * 0.5f, 
-                        0,
-                        -mapHeight * 0.5f + y * squareSize + squareSize* 0.5f);
-                
-                    controlNodes[x, y] = new ControlNode(pos, map[x, y] == 1, this.squareSize);
-                }
-            }
-            
-            squares = new Square[xnodes - 1, ynodes - 1];
-            
-            for (int x = 0; x < xnodes - 1; x++)
-            {
-                for (int y = 0; y < ynodes - 1; y++)
-                {
-                    squares[x, y] = new Square(
-                        controlNodes[x, y + 1],
-                        controlNodes[x + 1, y + 1],
-                        controlNodes[x, y],
-                        controlNodes[x + 1, y]);
-                }
-            }
-        }
-    }
-    public class Square
-    {
-        public ControlNode topLeft, topRight, bottomLeft , bottomRight;
-        public Node topMiddle, bottomMiddle, centerLeft, centreRight;
-        public int configuration;
-        // int depicting active nodes; 
-        /// <summary>
-        /// 1   2
-        ///
-        /// 4   3 = 1234
-        ///
-        /// e.g.
-        /// 0   1
-        ///
-        /// 1   0 = 0101 = 1+2^2 = 5
-        /// 
-        /// </summary>
-        /// <param name="topLeft"></param>
-        /// <param name="topRight"></param>
-        /// <param name="bottomLeft"></param>
-        /// <param name="bottomRight"></param>
-        
-
-        public Square(ControlNode topLeft, ControlNode topRight, ControlNode bottomLeft, ControlNode bottomRight)
-        {
-            this.topLeft = topLeft;
-            this.topRight = topRight;
-            this.bottomLeft = bottomLeft;
-            this.bottomRight = bottomRight;
-            this.topMiddle = topLeft.right;
-            this.bottomMiddle = bottomLeft.right;
-            this.centerLeft = bottomLeft.above;
-            this.centreRight = bottomRight.above;
-
-            configuration += (topLeft.active)?8:0;
-            configuration += (this.topRight.active)?4:0;
-            configuration += (this.bottomRight.active)?2:0;
-            configuration += (this.bottomLeft.active)?1:0;
-            
-        }
-    }
-    public class Node
-    {
-        public Vector3 position;
-        public int vertexIndex = -1;
-
-        public Node(Vector3 position)
-        {
-            this.position = position;
-        }
-    }
-
-    public class ControlNode : Node
-    {
-        public bool active;
-        public Node right, above;
-
-        public ControlNode(Vector3 position, bool active, float squareSize) : base(position)
-        {
-            this.active = active;
-            above = new Node(position + Vector3.forward * squareSize * 0.5f);
-            right = new Node(position + Vector3.right * squareSize * 0.5f);
-        }
-    }
-        #endregion
 
 }
