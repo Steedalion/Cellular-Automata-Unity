@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.WSA;
 using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour
 {
     public int width, height;
+    
 
     [Range(0,10)]
     public int borderSize = 5;
@@ -61,7 +63,7 @@ public class MapGenerator : MonoBehaviour
                 }
                 else
                 {
-                    borderedMap[x, y] = 1;
+                    borderedMap[x, y] = MAP.wall;
                 }
             }
         }
@@ -85,7 +87,7 @@ public class MapGenerator : MonoBehaviour
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
-                map[i, j] = Random.Range(0, 100) < fillPercent ? 1:0;
+                map[i, j] = Random.Range(0, 100) < fillPercent ? MAP.wall:MAP.empty;
         }
     }
 
@@ -114,10 +116,10 @@ private void SmoothMap()
                 // Debug.Log(surroundingWalls);
                 if (surroundingWalls > 4)
                 {
-                    map[x, y] = 1;
+                    map[x, y] = MAP.wall;
                 } else if (surroundingWalls < 4)
                 {
-                    map[x, y] = 0;
+                    map[x, y] = MAP.empty;
                 }
                     
                 // map[x, y] = (surroundingWalls > 4) ? 1 : 0;
@@ -127,24 +129,43 @@ private void SmoothMap()
 
 void RemoveSmallCavesAndCavities(int wallThreshold)
 {
-    RemoveSmallRegions(wallThreshold,1);
-    RemoveSmallRegions(wallThreshold,0);
+    RemoveSmallRegions(wallThreshold,MAP.wall);
+    RemoveSmallRegions(wallThreshold,MAP.empty);
 }
 [ContextMenu(nameof(RemoveSmallRegions))]
-private void RemoveSmallRegions(int wallThreshold, int tileType)
+private List<Room> RemoveSmallRegions(int wallThreshold, int tileType)
 {
-    List<List<Coord>> wallRegions = GetRegions(tileType);
-    int otherTileType = tileType == 1 ?0:1;
-    foreach (List<Coord> wallRegion in wallRegions)
+    List<Room> survivingRooms = new List<Room>();
+    List<List<Coord>> regions = GetRegions(tileType);
+    int otherTileType = tileType == MAP.wall ?MAP.empty:MAP.wall;
+    foreach (List<Coord> region in regions)
     {
-        if (wallRegion.Count < wallThreshold)
+        if (region.Count < wallThreshold)
         {
-            foreach (Coord coord in wallRegion)
+            foreach (Coord coord in region)
             {
                 map[coord.tileX, coord.tileY] = otherTileType;
             }
         }
+        else
+        {
+            survivingRooms.Add(new Room(region, map));
+        }
     }
+
+    return survivingRooms;
+}
+
+void ConnectClosestRooms(List<Room> all)
+{
+    foreach (Room room in all)
+    {
+        foreach (Room room1 in all)
+        {
+            //TODO continue here.
+        }
+    }
+    
 }
 
     private int GetSurroundingWallTiles(int x, int y)
@@ -224,10 +245,62 @@ private void RemoveSmallRegions(int wallThreshold, int tileType)
 
            return regions;
        }
- 
+
 }
 
-   public class Coord
+class Room
+{
+    private List<Coord> roomTiles, edgesTiles;
+    private List<Room> connectedRooms;
+    private int roomSize;
+
+    public Room(List<Coord> roomTiles, int[,] map)
+    {
+        this.roomTiles = roomTiles;
+        roomSize = roomTiles.Count;
+        connectedRooms = new List<Room>();
+        edgesTiles = new List<Coord>();
+        foreach (Coord tile in roomTiles)
+        {
+            for (int x = 0; x < tile.tileX; x++)
+            {
+                for (int y = 0; y < tile.tileY; y++)
+                {
+                    if (x == tile.tileX || y == tile.tileY)
+                    {
+                        if (map[x,y] == MAP.wall)
+                        {
+                            edgesTiles.Add(tile);
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+
+    public Room()
+    {
+    }
+
+    public static void ConnectRooms(Room A, Room B)
+    {
+        A.connectedRooms.Add(B);
+        B.connectedRooms.Add(A);
+    }
+
+    public bool isConnected(Room other)
+    {
+        return connectedRooms.Contains(other);
+    }
+}
+
+public static class MAP
+{
+    public const int wall = 1, empty = 0;
+}
+
+public class Coord
    {
        public int tileX, tileY;
 
