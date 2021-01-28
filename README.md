@@ -1,6 +1,7 @@
-# [Unity](https://unity.com/) Prototype
+# [Unity](https://unity.com/) Prototype procedural cave generation.
 
 ## Project Description:
+Generate a cave procdurally.
 
 ## Screenshots
 

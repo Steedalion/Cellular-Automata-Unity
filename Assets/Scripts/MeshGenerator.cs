@@ -8,29 +8,24 @@ public class MeshGenerator : MonoBehaviour
         private List<Vector3> vertices;
         private List<int> triangels;
         private Mesh mesh;
-        private SquareGrid squareGrid;
+        public SquareGrid squareGrid;
         private Dictionary<int, List<Triangle>> TriangelsUsingVertex =  new Dictionary<int, List<Triangle>>();
 
         private List<List<int>> outlines = new List<List<int>>();
         private HashSet<int> checkedOutlines = new HashSet<int>();
         [SerializeField] private MeshFilter walls;
 
-        private void Awake()
-        {
-            vertices = new List<Vector3>();
-        triangels = new List<int>();
-        mesh  = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
 
-        // mesh = GetComponent<MeshFilter>().mesh;
-        // mesh = new Mesh();
-        }
+
 
 
     public void GenerateMesh(int[,] map, float squareSize)
     {
         outlines.Clear();
         checkedOutlines.Clear();
+        TriangelsUsingVertex = new Dictionary<int, List<Triangle>>();
+        vertices = new List<Vector3>();
+        triangels = new List<int>();
         squareGrid = new SquareGrid(map, squareSize);
 
         for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
@@ -41,6 +36,8 @@ public class MeshGenerator : MonoBehaviour
             }
         }
 
+        mesh  = new Mesh();
+        GetComponent<MeshFilter>().mesh = mesh;
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangels.ToArray();
         mesh.RecalculateNormals();
@@ -65,10 +62,10 @@ public class MeshGenerator : MonoBehaviour
                 wallVertices.Add(vertices[outline[i]] - Vector3.up * wallHeight); //bottom Left
                 wallVertices.Add(vertices[outline[i+1]] - Vector3.up * wallHeight);
                 
+                //First triangle
                 wallTriangles.Add(startIndex + 0);
                 wallTriangles.Add(startIndex + 2);
                 wallTriangles.Add(startIndex + 3);
-                
                 
                 wallTriangles.Add(startIndex + 3);
                 wallTriangles.Add(startIndex + 1);
@@ -83,9 +80,11 @@ public class MeshGenerator : MonoBehaviour
 
     void TriangulateSquare(Square square)
     {
-        switch (square.configuration)
-        {
-           // 1 points:
+        switch (square.configuration) {
+        case 0:
+            break;
+
+        // 1 points:
         case 1:
             MeshFromPoints(square.centerLeft, square.bottomMiddle, square.bottomLeft);
             break;
@@ -185,7 +184,7 @@ public class MeshGenerator : MonoBehaviour
             for (int j = 0; j < 3; j++)
             {
                 int VertexB = triangle[j];
-                if(VertexB == vertexIndex || checkedOutlines.Contains(vertexIndex)) continue;
+                if(VertexB == vertexIndex || checkedOutlines.Contains(VertexB)) continue;
 
                 if (isOutlineEdge(vertexIndex, VertexB)) return VertexB;
 
@@ -199,17 +198,21 @@ public class MeshGenerator : MonoBehaviour
     {
         for (int vertexIndex = 0; vertexIndex < vertices.Count; vertexIndex++)
         {
-            if(checkedOutlines.Contains(vertexIndex)) continue;
-            int newOutlineVertex = GetConnectedOutlineVertex(vertexIndex);
-            if (newOutlineVertex == -1) continue;
-            checkedOutlines.Add(newOutlineVertex);
+            if (!checkedOutlines.Contains(vertexIndex))
+            {
+                int newOutlineVertex = GetConnectedOutlineVertex(vertexIndex);
+                if (newOutlineVertex != -1)
+                {
+                    checkedOutlines.Add(vertexIndex);
 
-            List<int> newOutline = new List<int>();
-            newOutline.Add(vertexIndex);
-            outlines.Add(newOutline);
-            FollowOutLine(newOutlineVertex, outlines.Count - 1);
-            
-            outlines[outlines.Count - 1].Add(vertexIndex); // why not add directly to newOutline?
+                    List<int> newOutline = new List<int>();
+                    newOutline.Add(vertexIndex);
+                    outlines.Add(newOutline);
+                    FollowOutLine(newOutlineVertex, outlines.Count - 1);
+
+                    outlines[outlines.Count - 1].Add(vertexIndex); // why not add directly to newOutline?
+                }
+            }
         }
     }
 
@@ -268,41 +271,4 @@ public class MeshGenerator : MonoBehaviour
             }
         }
     }
-    
-    
-    private void OnDrawGizmos()
-    {
-        if (squareGrid != null)
-        {
-            for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
-            {
-                for (int y = 0; y < squareGrid.squares.GetLength(1); y++)
-                {
-    
-                     Gizmos.color = (squareGrid.squares[x,y].topLeft.active)?Color.black :Color.white;
-                    Gizmos.DrawCube(squareGrid.squares[x,y].topLeft.position, Vector3.one * 0.4f);
-                    
-                    Gizmos.color = (squareGrid.squares[x,y].topRight.active)?Color.black :Color.white;
-                    Gizmos.DrawCube(squareGrid.squares[x,y].topRight.position, Vector3.one * 0.4f);
-    
-                    Gizmos.color = (squareGrid.squares[x,y].bottomLeft.active)?Color.black :Color.white;
-                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomLeft.position, Vector3.one * 0.4f);
-                    
-                    
-                    Gizmos.color = (squareGrid.squares[x,y].bottomRight.active)?Color.black :Color.white;
-                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomRight.position, Vector3.one * 0.4f);
-                    
-                    Gizmos.color = Color.gray;
-                    Gizmos.DrawCube(squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(squareGrid.squares[x,y].centreRight.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
-    
-                }
-                
-            }
-        }
-    }
-
-
 }
