@@ -12,16 +12,20 @@ public class MapGenerator : MonoBehaviour
     public int borderSize = 5;
     [Range(0,100)]
     public int fillPercent;
-
+    public int randomSeed;
     private MeshGenerator meshGenerator;
-    
     [Range(0,10)]
     public int smooths;
 
+    public int smallestRegion;
     private int[,] map;
 
     private void Start()
     {
+        if (randomSeed != 0)
+        {
+            Random.seed = randomSeed;
+        }
         meshGenerator = GetComponent<MeshGenerator>();
         GenerateRandomMap();
     }
@@ -37,8 +41,14 @@ public class MapGenerator : MonoBehaviour
     void GenerateRandomMap()
     {
         FillRandomMap();
-        SmoothMap();
-        
+        for (int i = 0; i < smooths; i++)
+        {
+                 SmoothMap();
+
+        }
+
+                RemoveSmallCavesAndCavities(smallestRegion);
+
         int[,] borderedMap = new int[width + 2 * borderSize, height + 2 * borderSize];
 
         for (int x = 0; x < borderedMap.GetLength(0); x++)
@@ -55,11 +65,18 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
-
         map = borderedMap;
+        //tODO Update map width and height
         meshGenerator.GenerateMesh(map, 1);
     }
+
+    private bool IsInMapRange(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
     
+ 
     [ContextMenu("Generate")]
     public void FillRandomMap()
     {
@@ -108,6 +125,28 @@ private void SmoothMap()
         }
     }
 
+void RemoveSmallCavesAndCavities(int wallThreshold)
+{
+    RemoveSmallRegions(wallThreshold,1);
+    RemoveSmallRegions(wallThreshold,0);
+}
+[ContextMenu(nameof(RemoveSmallRegions))]
+private void RemoveSmallRegions(int wallThreshold, int tileType)
+{
+    List<List<Coord>> wallRegions = GetRegions(tileType);
+    int otherTileType = tileType == 1 ?0:1;
+    foreach (List<Coord> wallRegion in wallRegions)
+    {
+        if (wallRegion.Count < wallThreshold)
+        {
+            foreach (Coord coord in wallRegion)
+            {
+                map[coord.tileX, coord.tileY] = otherTileType;
+            }
+        }
+    }
+}
+
     private int GetSurroundingWallTiles(int x, int y)
     {
         int wallCount = 0;
@@ -116,15 +155,85 @@ private void SmoothMap()
             for (int neighborY = y-1; neighborY <= y+1; neighborY++)
             {
                 if (neighborX == x && neighborY == y) continue; //self
-                wallCount += isWall(x, y) ? 1 : map[neighborX,neighborY];
+                wallCount += isBorder(x, y) ? 1 : map[neighborX,neighborY];
             }  
         }
         return wallCount;
     }
 
 
-    public bool isWall(int x, int y)
+    public bool isBorder(int x, int y)
     {
         return (x == 0 || y == 0 || x == width - 1 || y == height - 1);
     }
+    
+       private List<Coord> GetRegionTiles(int startX, int startY)
+    {
+        List<Coord> tilesInRegion = new List<Coord>();
+        int[,] visitied = new int[width, height];
+        int tileType = map[startX, startY];
+
+        Queue < Coord > queue = new Queue<Coord>();
+        queue.Enqueue(new Coord(startX,startY));
+        visitied[startX, startY] = 1;
+        while (queue.Count > 0)
+        {
+            Coord current = queue.Dequeue();
+            tilesInRegion.Add(current);
+
+            for (int x = current.tileX - 1; x <= current.tileX + 1; x++)
+            {
+                for (int y = current.tileY - 1; y <= current.tileY + 1; y++)
+                {
+                    if (IsInMapRange(x, y) && (y == current.tileY || x == current.tileX))
+                    {
+                        if (visitied[x, y] == 0 && map[x, y] == tileType)
+                        {
+                            visitied[x, y] = 1;
+                            queue.Enqueue(new Coord(x, y));
+                        }
+                    }
+                }
+            }
+        }
+
+        return tilesInRegion;
+    }
+
+       private List<List<Coord>> GetRegions(int tileType)
+       {
+           List<List<Coord>> regions = new List<List<Coord>>();
+           int[,] visited = new int[width, height];
+
+           for (int x = 0; x < width; x++)
+           {
+               for (int y = 0; y < height; y++)
+               {
+                   if (visited[x, y] == 0 && map[x, y] == tileType)
+                   {
+                       List<Coord> newRegion = GetRegionTiles(x, y);
+                       regions.Add(newRegion);
+
+                       foreach (Coord coord in newRegion)
+                       {
+                           visited[coord.tileX, coord.tileY] = 1;
+                       }
+                   }
+               }
+           }
+
+           return regions;
+       }
+ 
 }
+
+   public class Coord
+   {
+       public int tileX, tileY;
+
+       public Coord(int tileX, int tileY)
+       {
+           this.tileX = tileX;
+           this.tileY = tileY;
+       }
+   }

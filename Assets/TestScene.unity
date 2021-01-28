@@ -171,7 +171,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 9884f7feb4b952043b893afbd618847c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -236,8 +236,10 @@ MonoBehaviour:
   width: 128
   height: 72
   borderSize: 5
-  fillPercent: 38
-  smooths: 10
+  fillPercent: 49
+  randomSeed: 2
+  smooths: 1
+  smallestRegion: 50
 --- !u!4 &613224849
 Transform:
   m_ObjectHideFlags: 0

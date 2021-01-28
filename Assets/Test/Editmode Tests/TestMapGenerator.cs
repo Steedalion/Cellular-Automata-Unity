@@ -16,14 +16,14 @@ namespace Tests
             mp.width = 10;
             
             mp.FillRandomMap();
-            Assert.IsTrue(mp.isWall(0, 1));
-            Assert.IsTrue(mp.isWall(1, 0));
-            Assert.IsTrue(mp.isWall(9, 0));
-            Assert.IsTrue(mp.isWall(2, 19));
+            Assert.IsTrue(mp.isBorder(0, 1));
+            Assert.IsTrue(mp.isBorder(1, 0));
+            Assert.IsTrue(mp.isBorder(9, 0));
+            Assert.IsTrue(mp.isBorder(2, 19));
             
-            Assert.IsFalse(mp.isWall(8, 8));
-            Assert.IsFalse(mp.isWall(8, 18));
-            Assert.IsFalse(mp.isWall(10, 20));
+            Assert.IsFalse(mp.isBorder(8, 8));
+            Assert.IsFalse(mp.isBorder(8, 18));
+            Assert.IsFalse(mp.isBorder(10, 20));
         }
         [Test]
         public void NewTestScriptSimplePasses()
@@ -33,14 +33,14 @@ namespace Tests
             mp.width = 10;
             
             mp.FillRandomMap();
-            Assert.IsTrue(mp.isWall(0, 1));
-            Assert.IsTrue(mp.isWall(1, 0));
-            Assert.IsTrue(mp.isWall(9, 0));
-            Assert.IsTrue(mp.isWall(2, 19));
+            Assert.IsTrue(mp.isBorder(0, 1));
+            Assert.IsTrue(mp.isBorder(1, 0));
+            Assert.IsTrue(mp.isBorder(9, 0));
+            Assert.IsTrue(mp.isBorder(2, 19));
             
-            Assert.IsFalse(mp.isWall(8, 8));
-            Assert.IsFalse(mp.isWall(8, 18));
-            Assert.IsFalse(mp.isWall(10, 20));
+            Assert.IsFalse(mp.isBorder(8, 8));
+            Assert.IsFalse(mp.isBorder(8, 18));
+            Assert.IsFalse(mp.isBorder(10, 20));
         }
 
         // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
