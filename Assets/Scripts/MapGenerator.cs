@@ -129,8 +129,16 @@ public class MapGenerator : MonoBehaviour
     {
         RemoveSmallRegions(wallThreshold, MAP.wall);
         List<Room> rooms = RemoveSmallRegions(wallThreshold, MAP.empty);
+        rooms.Sort();
+        rooms[0].isMainRoom = true;
+        rooms[0].isConnectedToMain = true;
+        foreach (Room room in rooms)
+        {
+            Debug.Log(room.roomSize);
+        }
         ConnectClosestRooms(rooms);
     }
+
 
     [ContextMenu(nameof(RemoveSmallRegions))]
     private List<Room> RemoveSmallRegions(int wallThreshold, int tileType)
@@ -156,27 +164,54 @@ public class MapGenerator : MonoBehaviour
         return survivingRooms;
     }
 
-    void ConnectClosestRooms(List<Room> all)
+    void ConnectClosestRooms(List<Room> all, bool forceConnectedToMain = false)
     {
+        List<Room> roomListA = new List<Room>();
+        List<Room> roomListB = new List<Room>();
+        if (forceConnectedToMain)
+        {
+            foreach (Room room in all)
+            {
+                if (room.isConnectedToMain)
+                {
+                    roomListA.Add(room);
+                }
+                else
+                {
+                    roomListB.Add(room);
+                }
+            }
+        }
+        else
+        {
+            roomListA = all;
+            roomListB = all;
+        }
+        
         Coord bestTileA = null, bestTileB = null;
         Room bestRoomA = null, bestRoomB = null;
-
-        foreach (Room roomA in all)
+        float bestDistance = Mathf.Infinity;
+        foreach (Room roomA in roomListA)
         {
-            float bestDistance = Mathf.Infinity;
-
-            foreach (Room roomB in all.Where(roomB => roomA!=roomB))
+            if (!forceConnectedToMain)
             {
-                if (roomA == roomB)
-                {
-                    continue;
-                }
+                            bestDistance = Mathf.Infinity;
+                            if (roomA.connectedRooms.Count > 0)
+                            {
+                                continue;
+                            }
+                
+            }
 
-                if (roomA.IsConnected(roomB))
-                {
-                    bestDistance = Mathf.Infinity;
-                    break;
-                }
+            foreach (Room roomB in roomListB.Where(roomB => roomA!=roomB).Where(roomB => !roomA.IsConnected(roomB)))
+            {
+              
+
+                // if (roomA.IsConnected(roomB))
+                // {
+                //     bestDistance = Mathf.Infinity;
+                //     break;
+                // }
 
                 foreach (Coord edgeTileA in roomA.edgeTiles)
                 {
@@ -196,7 +231,19 @@ public class MapGenerator : MonoBehaviour
                 }
             }
 
-            if (bestDistance < Mathf.Infinity) CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
+            if (bestDistance < Mathf.Infinity && !forceConnectedToMain) 
+                CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
+        }
+
+        if (bestDistance < Mathf.Infinity && forceConnectedToMain)
+        {
+            CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
+             ConnectClosestRooms(all, true);
+        }
+
+        if (!forceConnectedToMain)
+        {
+            ConnectClosestRooms(all, true);
         }
     }
 
