@@ -131,7 +131,7 @@ public class MapGenerator : MonoBehaviour
         List<Room> rooms = RemoveSmallRegions(wallThreshold, MAP.empty);
         rooms.Sort();
         rooms[0].isMainRoom = true;
-        rooms[0].isConnectedToMain = true;
+        // rooms[0].isConnectedToMain = true;
         foreach (Room room in rooms)
         {
             Debug.Log(room.roomSize);

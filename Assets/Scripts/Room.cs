@@ -1,12 +1,13 @@
 ﻿using System;using System.Collections.Generic;
 
-public class Room: IComparable<Room>
+public class Room : IComparable<Room>
 {
     private readonly List<Coord> tiles;
     public readonly List<Coord> edgeTiles;
     public readonly List<Room> connectedRooms;
-    public bool isConnectedToMain, isMainRoom;
-    public int roomSize;
+    public bool isConnectedToMain;
+    public bool isMainRoom{set => this.isConnectedToMain = true;}
+    public readonly int roomSize;
 
 
     public Room()
