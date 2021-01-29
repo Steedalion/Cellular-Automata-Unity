@@ -236,7 +236,7 @@ MonoBehaviour:
   width: 128
   height: 72
   borderSize: 5
-  fillPercent: 49
+  fillPercent: 54
   randomSeed: 2
   smooths: 1
   smallestRegion: 50
