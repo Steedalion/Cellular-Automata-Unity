@@ -52,7 +52,7 @@ public class MapGenerator : MonoBehaviour
                 RemoveSmallCavesAndCavities(smallestRegion);
 
         int[,] borderedMap = new int[width + 2 * borderSize, height + 2 * borderSize];
-
+        
         for (int x = 0; x < borderedMap.GetLength(0); x++)
         {
             for (int y = 0; y < borderedMap.GetLength(1); y++)
@@ -130,7 +130,8 @@ private void SmoothMap()
 void RemoveSmallCavesAndCavities(int wallThreshold)
 {
     RemoveSmallRegions(wallThreshold,MAP.wall);
-    RemoveSmallRegions(wallThreshold,MAP.empty);
+    List<Room> rooms = RemoveSmallRegions(wallThreshold,MAP.empty);
+    ConnectClosestRooms(rooms);
 }
 [ContextMenu(nameof(RemoveSmallRegions))]
 private List<Room> RemoveSmallRegions(int wallThreshold, int tileType)
@@ -147,7 +148,7 @@ private List<Room> RemoveSmallRegions(int wallThreshold, int tileType)
                 map[coord.tileX, coord.tileY] = otherTileType;
             }
         }
-        else
+        else if(tileType == MAP.empty)
         {
             survivingRooms.Add(new Room(region, map));
         }
@@ -158,17 +159,66 @@ private List<Room> RemoveSmallRegions(int wallThreshold, int tileType)
 
 void ConnectClosestRooms(List<Room> all)
 {
-    foreach (Room room in all)
+    Debug.Log("Connecting rooms"+all.Count);
+    Coord bestTileA = null, bestTileB = null;
+    Room bestRoomA = null, bestRoomB = null;
+    
+    foreach (Room roomA in all)
     {
-        foreach (Room room1 in all)
+        foreach (Room roomB in all)
         {
-            //TODO continue here.
+            
+            float bestDistance = Mathf.Infinity;
+            if (roomA == roomB)
+            {
+                Debug.Log("Same room ");
+                continue;
+            }
+            if (roomA.IsConnected(roomB)) {
+                Debug.Log("Already connected roomA");
+                bestDistance = Mathf.Infinity;
+                break;
+            }
+            Debug.Log("Room A edge tiles"+roomA.edgeTiles.Count);
+            Debug.Log("Room B edge tiles"+roomB.edgeTiles.Count);
+            foreach (Coord edgeTileA in roomA.edgeTiles)
+            {
+                foreach (Coord edgeTileB in roomB.edgeTiles)
+                {
+                    float dist = Mathf.Pow(edgeTileA.tileX - edgeTileB.tileX, 2) +
+                                 Mathf.Pow(edgeTileA.tileY - edgeTileB.tileY, 2);
+                    Debug.Log("Distance"+dist+" best found"+bestDistance);
+                    if (dist < bestDistance)
+                    {
+                        Debug.Log("New best found");
+                        bestDistance = dist;
+                        bestRoomA = roomA;
+                        bestRoomB = roomB;
+                        bestTileA = edgeTileA;
+                        bestTileB = edgeTileB;
+                    }
+                }
+            }
+
+            if (bestDistance < Mathf.Infinity) CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
         }
     }
     
 }
 
-    private int GetSurroundingWallTiles(int x, int y)
+private void CreatePassage(Room roomA, Room roomB, Coord bestTileA, Coord bestTileB)
+{
+    Room.ConnectRooms(roomA, roomB);
+    Debug.Log("Creating passages rooms");
+    Debug.DrawRay(CoordToWorldPoint(bestTileA), CoordToWorldPoint(bestTileB), Color.cyan, 100 );
+}
+
+Vector3 CoordToWorldPoint(Coord coord)
+{
+    return new Vector3(-width / 2 + .5f + coord.tileX, 2, -height / 2 + .5f + coord.tileY);
+}
+
+private int GetSurroundingWallTiles(int x, int y)
     {
         int wallCount = 0;
         for (int neighborX = x-1; neighborX <= x+1; neighborX++)
@@ -250,27 +300,27 @@ void ConnectClosestRooms(List<Room> all)
 
 class Room
 {
-    private List<Coord> roomTiles, edgesTiles;
-    private List<Room> connectedRooms;
-    private int roomSize;
+    public List<Coord> roomTiles, edgeTiles;
+    public List<Room> connectedRooms;
+    int roomSize;
 
-    public Room(List<Coord> roomTiles, int[,] map)
+    public Room(List<Coord> tiles, int[,] map)
     {
-        this.roomTiles = roomTiles;
+        this.roomTiles = tiles;
         roomSize = roomTiles.Count;
         connectedRooms = new List<Room>();
-        edgesTiles = new List<Coord>();
+        edgeTiles = new List<Coord>();
         foreach (Coord tile in roomTiles)
         {
-            for (int x = 0; x < tile.tileX; x++)
+            for (int x = tile.tileX-1; x <= tile.tileX+1; x++)
             {
-                for (int y = 0; y < tile.tileY; y++)
+                for (int y = tile.tileY-1; y <= tile.tileY+1; y++)
                 {
                     if (x == tile.tileX || y == tile.tileY)
                     {
                         if (map[x,y] == MAP.wall)
                         {
-                            edgesTiles.Add(tile);
+                            edgeTiles.Add(tile);
                         }
                     }
                 }
@@ -289,7 +339,7 @@ class Room
         B.connectedRooms.Add(A);
     }
 
-    public bool isConnected(Room other)
+    public bool IsConnected(Room other)
     {
         return connectedRooms.Contains(other);
     }
