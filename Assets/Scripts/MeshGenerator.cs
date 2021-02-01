@@ -9,13 +9,14 @@ public class MeshGenerator : MonoBehaviour
         private List<int> triangles;
         private Mesh mapMesh;
         public SquareGrid squareGrid;
+        public bool is2d;
         private Dictionary<int, List<Triangle>> trianglesUsingVertex =  new Dictionary<int, List<Triangle>>();
 
         private readonly List<List<int>> outlines = new List<List<int>>();
         private readonly HashSet<int> checkedOutlines = new HashSet<int>();
         [SerializeField] private MeshFilter walls;
         private MeshFilter meshFilter;
-
+        public MeshFilter cave;
 
         private void Awake()
         {
@@ -40,12 +41,19 @@ public class MeshGenerator : MonoBehaviour
         }
 
         mapMesh  = new Mesh();
-        meshFilter.mesh = mapMesh;
+        cave.mesh = mapMesh;
         mapMesh.vertices = vertices.ToArray();
         mapMesh.triangles = triangles.ToArray();
         mapMesh.RecalculateNormals();
 
-        CreateWallMesh();
+        if (is2d)
+        {
+            
+        }
+        else
+        {
+            CreateWallMesh();
+        }
     }
 
     private void CreateWallMesh()
@@ -79,6 +87,9 @@ public class MeshGenerator : MonoBehaviour
         wallMesh.vertices = wallVertices.ToArray();
         wallMesh.triangles = wallTriangles.ToArray();
         walls.mesh = wallMesh;
+
+        Destroy(walls.gameObject.GetComponent<MeshCollider>());
+        MeshCollider wallCollider = walls.gameObject.AddComponent<MeshCollider>();
     }
 
     void TriangulateSquare(Square square)
