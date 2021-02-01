@@ -9,7 +9,7 @@ public class MeshGenerator : MonoBehaviour
         private List<int> triangles;
         private Mesh mapMesh;
         public SquareGrid squareGrid;
-        public bool is2d;
+        public bool is2D;
         private Dictionary<int, List<Triangle>> trianglesUsingVertex =  new Dictionary<int, List<Triangle>>();
 
         private readonly List<List<int>> outlines = new List<List<int>>();
@@ -46,9 +46,9 @@ public class MeshGenerator : MonoBehaviour
         mapMesh.triangles = triangles.ToArray();
         mapMesh.RecalculateNormals();
 
-        if (is2d)
+        if (is2D)
         {
-            
+            Generate2DColliders();
         }
         else
         {
@@ -56,7 +56,33 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-    private void CreateWallMesh()
+        private void Generate2DColliders()
+        {
+            EdgeCollider2D[] currentCollider2Ds = gameObject.GetComponents<EdgeCollider2D>();
+            for (int i = 0; i < currentCollider2Ds.Length; i++)
+            {
+                Destroy(currentCollider2Ds[i]);
+            }
+            
+            CalculateMeshOutlines();
+            
+            foreach (List<int> outline in outlines)
+            {
+                EdgeCollider2D edgeCollider2D = gameObject.AddComponent<EdgeCollider2D>();
+                Vector2[] edgePoints = new Vector2[outline.Count];
+
+                for (int i = 0; i < outline.Count; i++)
+                {
+                    float x = vertices[outline[i]].x;
+                    float z = vertices[outline[i]].z;
+                    edgePoints[i] = new Vector2(x,z);
+                }
+
+                edgeCollider2D.points = edgePoints;
+            }
+        }
+
+        private void CreateWallMesh()
     {
         CalculateMeshOutlines();
         List<Vector3> wallVertices = new List<Vector3>();
