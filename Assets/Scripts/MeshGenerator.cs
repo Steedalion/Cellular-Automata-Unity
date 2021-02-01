@@ -45,6 +45,18 @@ public class MeshGenerator : MonoBehaviour
         mapMesh.vertices = vertices.ToArray();
         mapMesh.triangles = triangles.ToArray();
         mapMesh.RecalculateNormals();
+        
+        // create texture
+        Vector2[] uvs = new Vector2[vertices.Count];
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            float percentX = Mathf.InverseLerp(-map.GetLength(0) * 0.5f * squareSize,-map.GetLength(0) * 0.5f * squareSize, vertices[i].x);
+            float percentY = Mathf.InverseLerp(-map.GetLength(0) * 0.5f * squareSize,-map.GetLength(0) * 0.5f * squareSize, vertices[i].z);
+            uvs[i] = new Vector2(percentX, percentY);
+        }
+
+        mapMesh.uv = uvs;
+        
 
         if (is2D)
         {
