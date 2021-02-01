@@ -6,26 +6,29 @@ using UnityEngine.PlayerLoop;
 public class MeshGenerator : MonoBehaviour
 {
         private List<Vector3> vertices;
-        private List<int> triangels;
-        private Mesh mesh;
+        private List<int> triangles;
+        private Mesh mapMesh;
         public SquareGrid squareGrid;
-        private Dictionary<int, List<Triangle>> TriangelsUsingVertex =  new Dictionary<int, List<Triangle>>();
+        private Dictionary<int, List<Triangle>> trianglesUsingVertex =  new Dictionary<int, List<Triangle>>();
 
-        private List<List<int>> outlines = new List<List<int>>();
-        private HashSet<int> checkedOutlines = new HashSet<int>();
+        private readonly List<List<int>> outlines = new List<List<int>>();
+        private readonly HashSet<int> checkedOutlines = new HashSet<int>();
         [SerializeField] private MeshFilter walls;
+        private MeshFilter meshFilter;
 
 
+        private void Awake()
+        {
+            meshFilter = GetComponent<MeshFilter>();
+        }
 
-
-
-    public void GenerateMesh(int[,] map, float squareSize)
+        public void GenerateMesh(int[,] map, float squareSize)
     {
         outlines.Clear();
         checkedOutlines.Clear();
-        TriangelsUsingVertex = new Dictionary<int, List<Triangle>>();
+        trianglesUsingVertex = new Dictionary<int, List<Triangle>>();
         vertices = new List<Vector3>();
-        triangels = new List<int>();
+        triangles = new List<int>();
         squareGrid = new SquareGrid(map, squareSize);
 
         for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
@@ -36,11 +39,11 @@ public class MeshGenerator : MonoBehaviour
             }
         }
 
-        mesh  = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangels.ToArray();
-        mesh.RecalculateNormals();
+        mapMesh  = new Mesh();
+        meshFilter.mesh = mapMesh;
+        mapMesh.vertices = vertices.ToArray();
+        mapMesh.triangles = triangles.ToArray();
+        mapMesh.RecalculateNormals();
 
         CreateWallMesh();
     }
@@ -159,9 +162,9 @@ public class MeshGenerator : MonoBehaviour
 
     void CreateTriangels(Node a, Node b, Node c)
     {
-        triangels.Add(a.vertexIndex);
-        triangels.Add(b.vertexIndex);
-        triangels.Add(c.vertexIndex);
+        triangles.Add(a.vertexIndex);
+        triangles.Add(b.vertexIndex);
+        triangles.Add(c.vertexIndex);
 
         Triangle triangle = new Triangle(a.vertexIndex, b.vertexIndex, c.vertexIndex);
         AddTriangleToDictionary(a.vertexIndex, triangle);
@@ -174,9 +177,9 @@ public class MeshGenerator : MonoBehaviour
     /// </summary>
     /// <param name="vertexIndex"></param>
     /// <returns>the other vertex, -1 if none exists</returns>
-    int GetConnectedOutlineVertex(int vertexIndex)
+    private int GetConnectedOutlineVertex(int vertexIndex)
     {
-        List<Triangle> trianglesContainingVertex = TriangelsUsingVertex[vertexIndex];
+        List<Triangle> trianglesContainingVertex = trianglesUsingVertex[vertexIndex];
 
         for (int i = 0; i < trianglesContainingVertex.Count; i++)
         {
@@ -230,7 +233,7 @@ public class MeshGenerator : MonoBehaviour
 
     bool isOutlineEdge(int vertexA, int vertexB)
     {
-        List<Triangle> trianglesContainingA = TriangelsUsingVertex[vertexA];
+        List<Triangle> trianglesContainingA = trianglesUsingVertex[vertexA];
         int sharedTriangles = 0;
         for (int i = 0; i < trianglesContainingA.Count; i++)
         {
@@ -246,15 +249,15 @@ public class MeshGenerator : MonoBehaviour
 
     void AddTriangleToDictionary(int vertexIndex, Triangle triangle)
     {
-        if (TriangelsUsingVertex.TryGetValue(vertexIndex, out List<Triangle> existingTriangels))
+        if (trianglesUsingVertex.TryGetValue(vertexIndex, out List<Triangle> existingTriangles))
         {
-            existingTriangels.Add(triangle);
+            existingTriangles.Add(triangle);
         }
         else
         {
             List<Triangle> newTriangles = new List<Triangle>();
             newTriangles.Add(triangle);
-            TriangelsUsingVertex.Add(vertexIndex, newTriangles);
+            trianglesUsingVertex.Add(vertexIndex, newTriangles);
         }
     }
 

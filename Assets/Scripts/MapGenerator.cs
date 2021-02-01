@@ -66,7 +66,7 @@ public class MapGenerator : MonoBehaviour
         //     }
         // }
         // map = borderedMap;
-        //tODO Update map width and height
+        //tODO Update map width and height after applying border padding.
         meshGenerator.GenerateMesh(map, 1);
     }
 
@@ -131,10 +131,10 @@ public class MapGenerator : MonoBehaviour
         List<Room> rooms = RemoveSmallRegions(wallThreshold, MAP.empty);
         rooms.Sort();
         rooms[0].isMainRoom = true;
-        foreach (Room room in rooms)
-        {
-            Debug.Log(room.roomSize);
-        }
+        // foreach (Room room in rooms)
+        // {
+        //     Debug.Log(room.roomSize);
+        // }
         ConnectClosestRooms(rooms);
     }
 
@@ -277,7 +277,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    List<Coord> GetPassageLine(Coord from, Coord to)
+    private static List<Coord> GetPassageLine(Coord from, Coord to)
     {
         List<Coord> line = new List<Coord>();
 
