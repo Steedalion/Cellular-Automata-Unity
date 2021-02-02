@@ -2,7 +2,7 @@
 
 public class Room : IComparable<Room>
 {
-    private readonly List<Coord> tiles;
+    public readonly List<Coord> tiles;
     public readonly List<Coord> edgeTiles;
     public readonly List<Room> connectedRooms;
     public bool isConnectedToMain;

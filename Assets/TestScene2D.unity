@@ -214,6 +214,7 @@ GameObject:
   - component: {fileID: 549975518}
   - component: {fileID: 549975517}
   - component: {fileID: 549975516}
+  - component: {fileID: 549975522}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -264,7 +265,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -331,6 +332,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &549975522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 549975515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fae3ae67e8292ff3583c78918b94c089, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapGenerator: {fileID: 613224848}
 --- !u!1 &572433158
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,7 +437,6 @@ GameObject:
   - component: {fileID: 613224850}
   - component: {fileID: 613224852}
   - component: {fileID: 613224851}
-  - component: {fileID: 613224853}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -443,13 +456,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 226a5954dbcd26646a6e59aa26e00e93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 128
-  height: 72
+  initialWidth: 100
+  initialHeight: 100
   borderSize: 5
-  fillPercent: 52
-  randomSeed: 2
-  smooths: 1
-  smallestRegion: 50
+  fillPercent: 53
+  randomSeed: 0
+  smooths: 2
+  smallestRegion: 20
 --- !u!4 &613224849
 Transform:
   m_ObjectHideFlags: 0
@@ -480,8 +493,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   is2D: 1
-  walls: {fileID: 46628430}
   cave: {fileID: 572433159}
+  uvTileAmount: 3
+  walls: {fileID: 46628430}
 --- !u!23 &613224851
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -529,18 +543,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 613224847}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &613224853
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 613224847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f7c4d53d3e34daea9f27ec786af8414, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &691553699
 GameObject:
   m_ObjectHideFlags: 0
@@ -720,13 +722,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1684157681}
-  m_LocalRotation: {x: 0.6423542, y: -0.25609726, z: 0.037436374, w: 0.7213833}
+  m_LocalRotation: {x: 0.36597303, y: 0.20278695, z: -0.44020945, w: 0.7944538}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 71.075005, y: -82.276, z: -57.982002}
+  m_LocalEulerAnglesHint: {x: 49.467003, y: 0, z: -57.982002}
 --- !u!1 &1726090258
 GameObject:
   m_ObjectHideFlags: 0
@@ -780,7 +782,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 68
+  orthographic size: 90
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

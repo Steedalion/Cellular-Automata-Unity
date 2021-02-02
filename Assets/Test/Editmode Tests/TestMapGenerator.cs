@@ -12,8 +12,8 @@ namespace Tests
         public void isWall()
         {
             MapGenerator mp = new MapGenerator();
-            mp.height = 20;
-            mp.width = 10;
+            mp.initialHeight = 20;
+            mp.initialWidth = 10;
             
             mp.FillRandomMap();
             Assert.IsTrue(mp.isBorder(0, 1));
@@ -29,8 +29,8 @@ namespace Tests
         public void NewTestScriptSimplePasses()
         {
             MapGenerator mp = new MapGenerator();
-            mp.height = 20;
-            mp.width = 10;
+            mp.initialHeight = 20;
+            mp.initialWidth = 10;
             
             mp.FillRandomMap();
             Assert.IsTrue(mp.isBorder(0, 1));

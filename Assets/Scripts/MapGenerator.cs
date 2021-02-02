@@ -8,8 +8,9 @@ using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour
 {
-    public int width, height;
-
+    [Min(5)] public int initialWidth = 30, initialHeight = 30;
+    public int width => map.GetLength(0);
+    public int height => map.GetLength(1);
 
     [Range(0, 10)] public int borderSize = 5;
     [Range(0, 100)] public int fillPercent;
@@ -19,6 +20,7 @@ public class MapGenerator : MonoBehaviour
 
     public int smallestRegion;
     private int[,] map;
+    private Room mainRoom;
 
     private void Start()
     {
@@ -49,23 +51,24 @@ public class MapGenerator : MonoBehaviour
 
         RemoveSmallCavesAndCavities(smallestRegion);
 
-        // int[,] borderedMap = new int[width + 2 * borderSize, height + 2 * borderSize];
-        //
-        // for (int x = 0; x < borderedMap.GetLength(0); x++)
-        // {
-        //     for (int y = 0; y < borderedMap.GetLength(1); y++)
-        //     {
-        //         if (x >= borderSize && x < width + borderSize && y >= borderSize && y < height + borderSize)
-        //         {
-        //             borderedMap[x, y] = map[x - borderSize, y - borderSize];
-        //         }
-        //         else
-        //         {
-        //             borderedMap[x, y] = MAP.wall;
-        //         }
-        //     }
-        // }
-        // map = borderedMap;
+        int[,] borderedMap = new int[width + 2 * borderSize, height + 2 * borderSize];
+
+        for (int x = 0; x < borderedMap.GetLength(0); x++)
+        {
+            for (int y = 0; y < borderedMap.GetLength(1); y++)
+            {
+                if (x >= borderSize && x < width + borderSize && y >= borderSize && y < height + borderSize)
+                {
+                    borderedMap[x, y] = map[x - borderSize, y - borderSize];
+                }
+                else
+                {
+                    borderedMap[x, y] = MAP.wall;
+                }
+            }
+        }
+
+        map = borderedMap;
         //tODO Update map width and height after applying border padding.
         meshGenerator.GenerateMesh(map, 1);
     }
@@ -79,13 +82,74 @@ public class MapGenerator : MonoBehaviour
     [ContextMenu("Generate")]
     public void FillRandomMap()
     {
-        map = new int[width, height];
+        map = new int[initialWidth, initialHeight];
 
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
                 map[i, j] = Random.Range(0, 100) < fillPercent ? MAP.wall : MAP.empty;
         }
+    }
+
+    bool Safe(int centerX, int centerY, int requirement1,int radius)
+        {
+            for (int x = centerX - radius; x <= centerX + radius; x++)
+            {
+                for (int y = centerY - radius; y <= centerY + radius; y++)
+                {
+                    if (!IsInMapRange(x, y) || map[x, y] != requirement1)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+    public Vector2 GetPlaceInMainRoom(int radius)
+    {
+        Vector2 position = new Vector2();
+        foreach (Coord coord in mainRoom.tiles)
+        {
+            if (Safe(coord.tileX, coord.tileY, MAP.empty, 2))
+            {
+                Debug.Log("Value of return point" +map[coord.tileX,coord.tileY]);
+                return CoordToWorldPoint(coord);
+            }
+        }
+
+        Debug.LogError("Could not find a safe place in Main room.");        
+        return position;
+    }
+    public Vector2 GetRandomPlace(bool wall, int radius)
+    {
+        
+
+        int requirement = wall ? MAP.wall : MAP.empty;
+        Vector2 position = new Vector2();
+        int center = -1;
+        int w = 0;
+        int h = 0;
+        bool safe = false;
+        int counter = 0;
+
+        for (int i = 0; i < 50; i++)
+        {
+            safe = true;
+            w = Random.Range(0, width);
+            h = Random.Range(0, height);
+            center = map[w, h];
+
+            safe = Safe(radius, w, h, requirement);
+            if (safe)
+            {
+                position = CoordToWorldPoint(new Coord(w, h));
+                return position;
+            }
+        }
+
+        Debug.LogError("Could not find a safe place to spawn.");
+        return position;
     }
 
     private void OnDrawGizmos()
@@ -131,6 +195,7 @@ public class MapGenerator : MonoBehaviour
         List<Room> rooms = RemoveSmallRegions(wallThreshold, MAP.empty);
         rooms.Sort();
         rooms[0].isMainRoom = true;
+        mainRoom = rooms[0];
         // foreach (Room room in rooms)
         // {
         //     Debug.Log(room.roomSize);
@@ -186,7 +251,7 @@ public class MapGenerator : MonoBehaviour
             roomListA = all;
             roomListB = all;
         }
-        
+
         Coord bestTileA = null, bestTileB = null;
         Room bestRoomA = null, bestRoomB = null;
         float bestDistance = Mathf.Infinity;
@@ -194,18 +259,15 @@ public class MapGenerator : MonoBehaviour
         {
             if (!forceConnectedToMain)
             {
-                            bestDistance = Mathf.Infinity;
-                            if (roomA.connectedRooms.Count > 0)
-                            {
-                                continue;
-                            }
-                
+                bestDistance = Mathf.Infinity;
+                if (roomA.connectedRooms.Count > 0)
+                {
+                    continue;
+                }
             }
 
-            foreach (Room roomB in roomListB.Where(roomB => roomA!=roomB).Where(roomB => !roomA.IsConnected(roomB)))
+            foreach (Room roomB in roomListB.Where(roomB => roomA != roomB).Where(roomB => !roomA.IsConnected(roomB)))
             {
-              
-
                 // if (roomA.IsConnected(roomB))
                 // {
                 //     bestDistance = Mathf.Infinity;
@@ -230,14 +292,14 @@ public class MapGenerator : MonoBehaviour
                 }
             }
 
-            if (bestDistance < Mathf.Infinity && !forceConnectedToMain) 
+            if (bestDistance < Mathf.Infinity && !forceConnectedToMain)
                 CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
         }
 
         if (bestDistance < Mathf.Infinity && forceConnectedToMain)
         {
             CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
-             ConnectClosestRooms(all, true);
+            ConnectClosestRooms(all, true);
         }
 
         if (!forceConnectedToMain)
@@ -253,7 +315,7 @@ public class MapGenerator : MonoBehaviour
         List<Coord> passageLine = GetPassageLine(tileA, tileB);
         foreach (Coord coord in passageLine)
         {
-            DrawCircle(coord,2);
+            DrawCircle(coord, 2);
         }
     }
 
@@ -273,7 +335,6 @@ public class MapGenerator : MonoBehaviour
                     }
                 }
             }
-            
         }
     }
 
@@ -287,10 +348,10 @@ public class MapGenerator : MonoBehaviour
         int dy = to.tileY - from.tileY;
 
         bool inverted = false;
-        
+
         int step = (int) Mathf.Sign(dx);
         int gradientStep = (int) Mathf.Sign(dy);
-        
+
         int longest = Mathf.Abs(dx);
         int shortest = Mathf.Abs(dy);
 
@@ -306,7 +367,7 @@ public class MapGenerator : MonoBehaviour
         int gradientAccumulation = longest / 2;
         for (int i = 0; i < longest; i++)
         {
-            line.Add(new Coord(x,y));
+            line.Add(new Coord(x, y));
 
             if (inverted) y += step;
             else x += step;
@@ -315,8 +376,7 @@ public class MapGenerator : MonoBehaviour
             {
                 if (inverted) x += gradientStep;
                 else y += gradientStep;
-                            gradientAccumulation -= longest;
-
+                gradientAccumulation -= longest;
             }
         }
 

@@ -3,18 +3,24 @@ using UnityEngine;
 
 public class MeshGenerator : MonoBehaviour
 {
-        private List<Vector3> vertices;
-        private List<int> triangles;
+        private List<Vector3> vertices = new List<Vector3>();
+        private List<int> triangles = new List<int>();
         private Mesh mapMesh;
         public SquareGrid squareGrid;
         public bool is2D;
+        public MeshFilter cave;
+
+        [Tooltip("The amount of UV's repeated over the map")]
+        public int uvTileAmount = 3;
         private Dictionary<int, List<Triangle>> trianglesUsingVertex =  new Dictionary<int, List<Triangle>>();
 
         private readonly List<List<int>> outlines = new List<List<int>>();
         private readonly HashSet<int> checkedOutlines = new HashSet<int>();
         [SerializeField] private MeshFilter walls;
         private MeshFilter meshFilter;
-        public MeshFilter cave;
+        
+
+
 
         private void Awake()
         {
@@ -25,9 +31,9 @@ public class MeshGenerator : MonoBehaviour
     {
         outlines.Clear();
         checkedOutlines.Clear();
-        trianglesUsingVertex = new Dictionary<int, List<Triangle>>();
-        vertices = new List<Vector3>();
-        triangles = new List<int>();
+        trianglesUsingVertex.Clear();
+        vertices.Clear();
+        triangles.Clear();
         squareGrid = new SquareGrid(map, squareSize);
 
         for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
@@ -44,22 +50,8 @@ public class MeshGenerator : MonoBehaviour
         mapMesh.vertices = vertices.ToArray();
         mapMesh.triangles = triangles.ToArray();
         mapMesh.RecalculateNormals();
-        
         // create texture
-        int tileAmount = 3;
-        Vector2[] uvs = new Vector2[vertices.Count];
-        for (int i = 0; i < vertices.Count; i++)
-        {
-            float widthOfUnit = map.GetLength(0) / 2 * squareSize;
-            float percentX = Mathf.InverseLerp(-widthOfUnit,widthOfUnit, vertices[i].x)*tileAmount;
-            float percentY = Mathf.InverseLerp(-widthOfUnit ,widthOfUnit, vertices[i].z)*tileAmount;
-            // percentX *= tileAmount; percentY*=tileAmount;
-            uvs[i] = new Vector2(percentX, percentY);
-        }
-
-        mapMesh.uv = uvs;
-        
-        
+        mapMesh.uv = CreateUvs(map, squareSize, uvTileAmount);
 
         if (is2D)
         {
@@ -71,12 +63,30 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
+        private Vector2[] CreateUvs(int[,] map, float squareSize, int tileAmount)
+        {
+            Vector2[] uvs = new Vector2[vertices.Count];
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                float widthOfUnit;
+                widthOfUnit = map.GetLength(map.GetLength(0) > map.GetLength(1) ? 0 : 1);
+                widthOfUnit *= 0.5f * squareSize;
+                float percentX = Mathf.InverseLerp(-widthOfUnit, widthOfUnit, vertices[i].x) * tileAmount;
+                float percentY = Mathf.InverseLerp(-widthOfUnit, widthOfUnit, vertices[i].z) * tileAmount;
+                // percentX *= tileAmount; percentY*=tileAmount;
+                uvs[i] = new Vector2(percentX, percentY);
+                
+            }
+
+            return uvs;
+        }
+
         private void Generate2DColliders()
         {
-            EdgeCollider2D[] currentCollider2Ds = gameObject.GetComponents<EdgeCollider2D>();
-            for (int i = 0; i < currentCollider2Ds.Length; i++)
+            EdgeCollider2D[] oldColliders = gameObject.GetComponents<EdgeCollider2D>();
+            foreach (EdgeCollider2D collider in oldColliders)
             {
-                Destroy(currentCollider2Ds[i]);
+                Destroy(collider);
             }
             
             CalculateMeshOutlines();
