@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 public class MeshGenerator : MonoBehaviour
 {
@@ -42,19 +40,20 @@ public class MeshGenerator : MonoBehaviour
 
         mapMesh  = new Mesh();
         cave.mesh = mapMesh;
+        
         mapMesh.vertices = vertices.ToArray();
         mapMesh.triangles = triangles.ToArray();
         mapMesh.RecalculateNormals();
         
         // create texture
-        int tileAmount = 10;
+        int tileAmount = 3;
         Vector2[] uvs = new Vector2[vertices.Count];
         for (int i = 0; i < vertices.Count; i++)
         {
-            float percentX = Mathf.InverseLerp(-map.GetLength(0) * 0.5f * squareSize,-map.GetLength(0) * 0.5f * squareSize, vertices[i].x);
-            float percentY = Mathf.InverseLerp(-map.GetLength(0) * 0.5f * squareSize,-map.GetLength(0) * 0.5f * squareSize, vertices[i].z);
-            percentX *= tileAmount;
-            percentY *= tileAmount;
+            float widthOfUnit = map.GetLength(0) / 2 * squareSize;
+            float percentX = Mathf.InverseLerp(-widthOfUnit,widthOfUnit, vertices[i].x)*tileAmount;
+            float percentY = Mathf.InverseLerp(-widthOfUnit ,widthOfUnit, vertices[i].z)*tileAmount;
+            // percentX *= tileAmount; percentY*=tileAmount;
             uvs[i] = new Vector2(percentX, percentY);
         }
 

@@ -31,10 +31,10 @@ public class DrawSuperGridGizmo : MonoBehaviour
                     Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].bottomRight.position, Vector3.one * 0.4f);
                     
                     Gizmos.color = Color.gray;
-                    Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].centreRight.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
-                    Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
+                    // Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].centerLeft.position, Vector3.one * .15f);
+                    // Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].centreRight.position, Vector3.one * .15f);
+                    // Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].topMiddle.position, Vector3.one * .15f);
+                    // Gizmos.DrawCube(meshGenerator.squareGrid.squares[x,y].bottomMiddle.position, Vector3.one * .15f);
     
                 }
                 

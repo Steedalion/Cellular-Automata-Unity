@@ -32,7 +32,7 @@
         this.centerLeft = bottomLeft.above;
         this.centreRight = bottomRight.above;
 
-        configuration += (topLeft.active)?8:0;
+        configuration += (this.topLeft.active)?8:0;
         configuration += (this.topRight.active)?4:0;
         configuration += (this.bottomRight.active)?2:0;
         configuration += (this.bottomLeft.active)?1:0;
