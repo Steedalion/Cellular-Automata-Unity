@@ -8,9 +8,12 @@ using Random = UnityEngine.Random;
 
 public class MapGenerator : MonoBehaviour
 {
-    [Min(5)] public int initialWidth = 30, initialHeight = 30;
-    public int width => map.GetLength(0);
-    public int height => map.GetLength(1);
+    [Min(5)] public int width = 30, height = 30;
+    
+
+
+    // public int width => map.GetLength(0);
+    // public int height => map.GetLength(1);
 
     [Range(0, 10)] public int borderSize = 5;
     [Range(0, 100)] public int fillPercent;
@@ -82,7 +85,7 @@ public class MapGenerator : MonoBehaviour
     [ContextMenu("Generate")]
     public void FillRandomMap()
     {
-        map = new int[initialWidth, initialHeight];
+        map = new int[width, height];
 
         for (int i = 0; i < width; i++)
         {
@@ -106,12 +109,28 @@ public class MapGenerator : MonoBehaviour
 
             return true;
         }
+
+    private void OnDrawGizmosSelected()
+    {
+        DrawRoom(mainRoom);
+    }
+
+    private void DrawRoom(Room room)
+    {
+        
+        foreach (Coord coord in room.tiles)
+        {Gizmos.color = Color.blue;
+            Gizmos.DrawCube(CoordToWorldPoint(coord), Vector3.one*0.5f);
+        }
+    }
     public Vector2 GetPlaceInMainRoom(int radius)
     {
+        
+
         Vector2 position = new Vector2();
         foreach (Coord coord in mainRoom.tiles)
         {
-            if (Safe(coord.tileX, coord.tileY, MAP.empty, 2))
+            if (Safe(coord.tileX, coord.tileY, MAP.empty, radius))
             {
                 Debug.Log("Value of return point" +map[coord.tileX,coord.tileY]);
                 return CoordToWorldPoint(coord);
@@ -385,7 +404,7 @@ public class MapGenerator : MonoBehaviour
 
     Vector3 CoordToWorldPoint(Coord tile)
     {
-        return new Vector3(-width / 2 + .5f + tile.tileX, 2, -height / 2 + .5f + tile.tileY);
+        return new Vector3(-width / 2 + .5f + tile.tileX, -2, -height / 2 + .5f + tile.tileY);
     }
 
     private int GetSurroundingWallTiles(int x, int y)

@@ -18,13 +18,14 @@ public class Respawn : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //Todo event after new map generated.
-            Invoke(nameof(SpawnOnSafeSpot), 2);
+            Invoke(nameof(SpawnOnSafeSpot), 3);
         }
     }
 
     void SpawnOnSafeSpot()
     {
                     gameObject.transform.position = mapGenerator.GetPlaceInMainRoom(1);
+                    
 
     }
 }
